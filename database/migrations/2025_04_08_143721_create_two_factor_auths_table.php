@@ -13,6 +13,11 @@ return new class extends Migration
     {
         Schema::create('two_factor_auths', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade')->unique();
+            $table->boolean('is_enabled')->default(false);
+            $table->string('method')->nullable(); // Ejemplo: 'sms', 'authenticator'
+            $table->text('secret_key')->nullable(); // Para aplicaciones de autenticación
+            $table->json('backup_codes')->nullable();
             $table->timestamps();
         });
     }
