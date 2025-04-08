@@ -12,8 +12,6 @@ RUN chmod +x /usr/local/bin/install-php-extensions && \
 
 install-php-extensions mbstring
 
-
-
 # Instalar dependencias y extensiones PHP necesarias
 
 RUN apt-get update && apt-get install -y \
@@ -66,7 +64,7 @@ php artisan view:cache && \
 php artisan storage:link
 # Configurar permisos
 
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+RUN chown -R $(id -u www-data):$(id -u www-data) /var/www/html/storage /var/www/html/bootstrap/cache
 
 
 # Configuración de PHP para producción
