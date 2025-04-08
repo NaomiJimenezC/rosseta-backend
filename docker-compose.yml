@@ -1,0 +1,53 @@
+version: '3.8'
+services:
+  app:
+    build: .  # Contexto del Dockerfile de PHP-FPM
+    container_name: tu_aplicacion_php
+    ports:
+      - "9000:9000"
+    volumes:
+      - .:/var/www/html
+    environment:
+      - APP_ENV=production
+      - DB_CONNECTION=${DB_CONNECTION}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_DATABASE=${DB_DATABASE}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      # Otras variables de entorno de tu aplicación
+    depends_on:
+      - pgsql
+    env_file:
+      - .env
+    entrypoint: /usr/local/bin/docker-entrypoint.sh
+
+  web:
+    build: ./nginx
+    container_name: tu_aplicacion_nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - /etc/letsencrypt:/etc/letsencrypt
+      - .:/var/www/html:ro # Monta el código de la aplicación en modo solo lectura
+    depends_on:
+      - app
+
+  pgsql:
+    image: postgres:latest  # Puedes especificar una versión si lo deseas (ej: postgres:15)
+    container_name: tu_base_de_datos_pgsql
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432" # Puedes cambiar el puerto del host si es necesario
+    volumes:
+      - pgsql_data:/var/lib/postgresql/data
+    env_file:
+      - .env
+
+volumes:
+  pgsql_data:
