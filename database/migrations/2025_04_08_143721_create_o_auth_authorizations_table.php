@@ -12,9 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('oauth_authorizations', function (Blueprint $table) {
-            $table->id('authorization_id'); // Especificamos el nombre de la clave primaria
-            $table->foreignId('oauth_app_id')->constrained('oauth_apps')->onDelete('cascade');
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->id(); // Especificamos el nombre de la clave primaria
+            $table->foreignId('oauth_app_id')->constrained('oauth_apps', 'oauth_app_id')->onDelete('cascade');            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->text('access_token');
             $table->text('refresh_token')->nullable(); // El refresh token podría ser opcional
             $table->timestamp('expires_at')->nullable();
