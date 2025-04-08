@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -87,8 +88,40 @@ class AuthController extends Controller
 
         } catch (\Exception $e) {
             // Log the error
-            // Log::error('Error al registrar usuario: ' . $e->getMessage());
-            return response()->json(['message' => 'Error al registrar el usuario'], 500);
+            Log::error('Error al registrar usuario: ' . $e->getMessage());
+            return response()->json(['message' => $e], 500);
+        }
+    }
+
+    public function verifyEmail(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|string|email',
+            'verification_code' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return response()->json(['message' => 'Correo electrónico no encontrado.'], 404);
+        }
+
+        if ($user->hasVerifiedEmail()) {
+            return response()->json(['message' => 'Este correo electrónico ya ha sido verificado.'], 200);
+        }
+
+        if ($user->verification_code === $request->verification_code) {
+            $user->email_verified_at = now();
+            $user->verification_code = null; // Limpiar el código después de la verificación
+            $user->save();
+
+            return response()->json(['message' => 'Correo electrónico verificado exitosamente.'], 200);
+        } else {
+            return response()->json(['message' => 'El código de verificación no es válido.'], 400);
         }
     }
 
