@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Comment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Notification;
+use App\Events\NewComment;
 use Illuminate\Support\Facades\Validator;
 
 class CommentController extends Controller
@@ -61,19 +61,7 @@ class CommentController extends Controller
 
             // Verificar que el creador del post no sea el mismo que el que comenta
             if ($postCreatorId !== $commenterId) {
-                // Crear la notificación dirigida al creador del post
-                Notification::create([
-                    'user_id' => $postCreatorId, // ID del destinatario (creador del post)
-                    'type' => 'new_comment', // Puedes definir diferentes tipos de notificaciones
-                    'notifiable_type' => 'App\Models\Post', // O el modelo relevante
-                    'notifiable_id' => $post->id,
-                    'data' => [ // Datos adicionales que quieras incluir en la notificación
-                        'comment_id' => $comment->id,
-                        'commenter_id' => $commenterId,
-                        'commenter_username' => Auth::user()->username, // O la información que necesites
-                        'post_id' => $post->id,
-                    ],
-                ]);
+                broadcast(new NewComment($comment));
             }
 
             return response()->json(['message' => 'Comentario creado correctamente.', 'comment' => $comment], 201);
