@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\PostController;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,4 +26,10 @@ Route::group(['prefix' => 'v1'], function () {
     Route::post('/login', [AuthController::class, 'login'])->name('login');
     Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum')->name('logout');
     Route::post('/verify-email', [AuthController::class, 'verifyEmail'])->name('verify.email');
+
+    // Rutas para los posts
+    Route::get('/users/{user_id}/posts', [PostController::class, 'index'])->name('posts.index');
+    Route::get('/posts/{post_id}', [PostController::class, 'getPost'])->name('posts.show');
+    Route::post('/posts', [PostController::class, 'store'])->middleware('auth:sanctum')->name('posts.store');
+    Route::delete('/posts/{post_id}', [PostController::class, 'delete'])->middleware('auth:sanctum')->name('posts.destroy');
 });
