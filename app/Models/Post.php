@@ -16,7 +16,7 @@ class Post extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'user_id', // Asegúrate de que coincida con el nombre de la columna en la migración
+        'users_id',
         'content',
         'image_url',
         'caption',
