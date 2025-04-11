@@ -55,10 +55,9 @@ class PostController extends Controller
             return response()->json($validator->errors(), 422);
         }
 
-
         try {
             $post = Post::create([
-                'users_id' => Auth::id(), // Obtener el ID del usuario autenticado
+                'users_id' => $userId = $request->user()->id,
                 'image_url' => $request->input('image_url'),
                 'content' => $request->input('content'),
                 'caption' => $request->input('caption'),
