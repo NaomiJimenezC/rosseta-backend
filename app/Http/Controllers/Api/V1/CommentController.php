@@ -60,10 +60,10 @@ class CommentController extends Controller
             // Obtener el ID del usuario que creó el comentario
             $commenterId = Auth::id();
 
-//            // Verificar que el creador del post no sea el mismo que el que comenta
-//            if ($postCreatorId !== $commenterId) {
-//                broadcast(new NewComment($comment));
-//            }
+            // Verificar que el creador del post no sea el mismo que el que comenta
+            if ($postCreatorId !== $commenterId) {
+                broadcast(new NewComment($comment));
+            }
 
             return response()->json(['message' => 'Comentario creado correctamente.', 'comment' => $comment], 201);
         } catch (\Exception $e) {
