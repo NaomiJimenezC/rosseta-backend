@@ -57,7 +57,7 @@ class PostController extends Controller
 
         try {
             $post = Post::create([
-                'users_id' => $userId = $request->user()->id,
+                'users_id' => $request->user()->id,
                 'image_url' => $request->input('image_url'),
                 'content' => $request->input('content'),
                 'caption' => $request->input('caption'),
