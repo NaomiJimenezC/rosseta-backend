@@ -46,14 +46,14 @@
             Route::get('/users/liked', [LikeController::class, 'index'])->name('likes.index'); // Get all posts with like information for the authenticated user
             Route::get('/posts/likes', [LikeController::class, 'show']) ->name('likes.show');
             Route::post('/posts/{post}/like', [LikeController::class, 'store'])->name('likes.store'); // Like a specific post
-            Route::delete('/posts/{post}/like', [LikeController::class, 'destroy'])->name('likes.destroy'); // Unlike a specific post
+            Route::delete('/posts/{post}/dislike', [LikeController::class, 'destroy'])->name('likes.destroy'); // Unlike a specific post
         });
     
         //Rutas para los follows
 
         Route::middleware('auth:sanctum')->group(function () {
             Route::post('/users/{user}/follow', [FollowController::class, 'follow'])->name('follows.store');
-            Route::delete('/users/{user}/follow', [FollowController::class, 'unfollow'])->name('follows.destroy');
+            Route::delete('/users/{user}/unfollow', [FollowController::class, 'unfollow'])->name('follows.destroy');
             Route::get('/users/{user}/followers', [FollowController::class, 'followers'])->name('follows.followers');
             Route::get('/users/{user}/following', [FollowController::class, 'following'])->name('follows.following');
         });

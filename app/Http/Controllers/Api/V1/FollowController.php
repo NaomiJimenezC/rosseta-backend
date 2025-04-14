@@ -98,7 +98,7 @@ class FollowController extends Controller
      * @param  \App\Models\User  $user The user to get followers for.
      * @return \Illuminate\Http\JsonResponse
      */
-    public function followers(User $user)
+    public function getFollowers(User $user)
     {
         $followers = $user->followers()->with('follower')->paginate(10); // Eager load follower details
         return response()->json($followers);
@@ -110,7 +110,7 @@ class FollowController extends Controller
      * @param  \App\Models\User  $user The user to get the following list for.
      * @return \Illuminate\Http\JsonResponse
      */
-    public function following(User $user)
+    public function getFollowing(User $user)
     {
         $following = $user->following()->with('followee')->paginate(10); // Eager load followee details
         return response()->json($following);
