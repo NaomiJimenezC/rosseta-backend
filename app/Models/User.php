@@ -68,6 +68,17 @@ class User extends Authenticatable
     }
 
     /**
+     * Verifica si el usuario actual sigue al usuario dado.
+     *
+     * @param  \App\Models\User  $user  El usuario que se desea verificar.
+     * @return bool
+     */
+    public function isFollowing(User $user): bool
+    {
+        return $this->following()->where('followee_id', $user->id)->exists();
+    }
+
+    /**
      * Get the likes associated with the user.
      */
     public function likes(): HasMany

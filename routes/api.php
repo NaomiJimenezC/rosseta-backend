@@ -56,6 +56,7 @@
             Route::delete('/users/{user}/unfollow', [FollowController::class, 'unfollow'])->name('follows.destroy');
             Route::get('/users/{user}/followers', [FollowController::class, 'getFollowers'])->name('follows.followers');
             Route::get('/users/{user}/following', [FollowController::class, 'getFollowing'])->name('follows.following');
+            Route::get('/users/{user}/is-following', [FollowController::class, 'isFollowing'])->name('follows.isFollowing');
         });
 
 

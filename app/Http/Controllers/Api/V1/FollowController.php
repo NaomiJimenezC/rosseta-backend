@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 class FollowController extends Controller
@@ -130,6 +131,29 @@ class FollowController extends Controller
         } catch (\Exception $e) {
             Log::error('Error fetching following for user ' . $user->id . ': ' . $e->getMessage());
             return response()->json(['message' => 'Error al obtener los usuarios seguidos.'], 500);
+        }
+    }
+
+    public function isFollowing(User $user): JsonResponse
+    {
+        try {
+            $currentUser = Auth::user();
+
+            if (!$currentUser) {
+                return response()->json(['message' => 'No estás autenticado.'], 401);
+            }
+
+            // Verificar si el usuario autenticado está intentando seguirse a sí mismo
+            if ($currentUser->id === $user->id) {
+                return response()->json(['message' => 'No puedes seguirte a ti mismo.'], 400);
+            }
+
+            $isFollowing = $currentUser->isFollowing($user);
+
+            return response()->json(['isFollowing' => $isFollowing], 200);
+        } catch (\Exception $e) {
+            //Log::error("Error al verificar si el usuario {$currentUser->id ?? 'desconocido'} sigue al usuario {$user->id}: " . $e->getMessage());
+            return response()->json(['message' => 'Error interno al procesar la solicitud.', 'error' => $e->getMessage()], 500);
         }
     }
 }
