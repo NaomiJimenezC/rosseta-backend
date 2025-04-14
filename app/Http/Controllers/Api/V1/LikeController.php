@@ -26,7 +26,7 @@ class LikeController extends Controller
         }
 
         $posts = Post::with(['likes' => function ($query) {
-            $query->where('user_id', Auth::id());
+            $query->where('users_id', Auth::id());
         }])->latest()->paginate(10); // Adjust pagination as needed
 
         $posts->getCollection()->transform(function ($post) {
