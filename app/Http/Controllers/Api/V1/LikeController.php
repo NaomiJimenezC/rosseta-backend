@@ -19,7 +19,7 @@ class LikeController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function index(Request $request): \Illuminate\Http\JsonResponse
+    public function index(): \Illuminate\Http\JsonResponse
     {
         if (!Auth::check()) {
             return response()->json(['message' => 'Debes estar autenticado para ver los likes.'], 401);
