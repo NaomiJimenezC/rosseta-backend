@@ -43,7 +43,7 @@
 
         // Rutas para los me gustas
         Route::middleware('auth:sanctum')->group(function () {
-            Route::get('/posts/liked', [LikeController::class, 'index'])->name('likes.index'); // Get all posts with like information for the authenticated user
+            Route::get('/posts/pruebaPqEstoyLoca', [LikeController::class, 'index'])->name('likes.index'); // Get all posts with like information for the authenticated user
             Route::post('/posts/{post}/like', [LikeController::class, 'store'])->name('likes.store'); // Like a specific post
             Route::delete('/posts/{post}/like', [LikeController::class, 'destroy'])->name('likes.destroy'); // Unlike a specific post
         });
