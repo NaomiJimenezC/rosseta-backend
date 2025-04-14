@@ -6,6 +6,7 @@ use App\Events\UserFollowed;
 use App\Http\Controllers\Controller;
 use App\Models\Follow;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -98,10 +99,21 @@ class FollowController extends Controller
      * @param  \App\Models\User  $user The user to get followers for.
      * @return \Illuminate\Http\JsonResponse
      */
-    public function getFollowers(User $user)
+    /**
+     * Get the followers of a specific user.
+     *
+     * @param  \App\Models\User  $user The user to get followers for.
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getFollowers(User $user): JsonResponse
     {
-        $followers = $user->followers()->with('follower')->paginate(10); // Eager load follower details
-        return response()->json($followers);
+        try {
+            $followers = $user->followers()->with('follower')->paginate(10); // Eager load follower details
+            return response()->json($followers);
+        } catch (\Exception $e) {
+            Log::error('Error fetching followers for user ' . $user->id . ': ' . $e->getMessage());
+            return response()->json(['message' => 'Error al obtener los seguidores.'], 500);
+        }
     }
 
     /**
@@ -110,9 +122,14 @@ class FollowController extends Controller
      * @param  \App\Models\User  $user The user to get the following list for.
      * @return \Illuminate\Http\JsonResponse
      */
-    public function getFollowing(User $user)
+    public function getFollowing(User $user): JsonResponse
     {
-        $following = $user->following()->with('followee')->paginate(10); // Eager load followee details
-        return response()->json($following);
+        try {
+            $following = $user->following()->with('followee')->paginate(10); // Eager load followee details
+            return response()->json($following);
+        } catch (\Exception $e) {
+            Log::error('Error fetching following for user ' . $user->id . ': ' . $e->getMessage());
+            return response()->json(['message' => 'Error al obtener los usuarios seguidos.'], 500);
+        }
     }
 }

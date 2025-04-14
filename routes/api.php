@@ -54,8 +54,8 @@
         Route::middleware('auth:sanctum')->group(function () {
             Route::post('/users/{user}/follow', [FollowController::class, 'follow'])->name('follows.store');
             Route::delete('/users/{user}/unfollow', [FollowController::class, 'unfollow'])->name('follows.destroy');
-            Route::get('/users/{user}/followers', [FollowController::class, 'followers'])->name('follows.followers');
-            Route::get('/users/{user}/following', [FollowController::class, 'following'])->name('follows.following');
+            Route::get('/users/{user}/followers', [FollowController::class, 'getFollowers'])->name('follows.followers');
+            Route::get('/users/{user}/following', [FollowController::class, 'getFollowing'])->name('follows.following');
         });
 
 
