@@ -25,7 +25,7 @@ class LikeController extends Controller
             return response()->json(['message' => 'Debes estar autenticado para ver los likes.'], 401);
         }
 
-        $posts = Like::where('user_id', Auth::id())->get();
+        $posts = Like::all();
 
         return response()->json($posts);
     }
