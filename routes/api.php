@@ -47,6 +47,7 @@
             Route::get('/posts/likes', [LikeController::class, 'show']) ->name('likes.show');
             Route::post('/posts/{post}/like', [LikeController::class, 'store'])->name('likes.store'); // Like a specific post
             Route::delete('/posts/{post}/dislike', [LikeController::class, 'destroy'])->name('likes.destroy'); // Unlike a specific post
+            Route::get('/posts/{post}/liked', [LikeController::class, 'hasLiked'])->name('posts.hasLiked');
         });
     
         //Rutas para los follows
@@ -58,7 +59,6 @@
             Route::get('/users/{user}/following', [FollowController::class, 'getFollowing'])->name('follows.following');
             Route::get('/users/{user}/is-following', [FollowController::class, 'isFollowing'])->name('follows.isFollowing');
         });
-
 
         //Rutas para el perfil del usuario
     

@@ -138,4 +138,20 @@ class LikeController extends Controller
 
         return response()->json($posts_likes);
     }
+
+    public function hasLiked(Request $request, $postId)
+    {
+        if (!Auth::check()) {
+            return response()->json(['hasLiked' => false]); // O podrías devolver un 401
+        }
+
+        $userId = Auth::id();
+
+        $hasLiked = Like::where('user_id', $userId)
+            ->where('post_id', $postId)
+            ->exists();
+
+        return response()->json(['hasLiked' => $hasLiked]);
+    }
+
 }
