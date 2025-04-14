@@ -19,19 +19,13 @@ class LikeController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function index(Request $request)
+    public function index(Request $request): \Illuminate\Http\JsonResponse
     {
         if (!Auth::check()) {
             return response()->json(['message' => 'Debes estar autenticado para ver los likes.'], 401);
         }
 
         $posts = Like::where('user_id', Auth::id())->get();
-
-        $posts->getCollection()->transform(function ($post) {
-            $post->is_liked = $post->likes->isNotEmpty();
-            unset($post->likes); // Remove the likes relationship to avoid redundancy
-            return $post;
-        });
 
         return response()->json($posts);
     }
