@@ -122,4 +122,20 @@ class LikeController extends Controller
             return response()->json(['message' => 'Error al quitar el me gusta.', 'error' => $e->getMessage()], 500);
         }
     }
+    public function show(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'post_id' => 'required|exists:posts,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        $validatedPostId = $validator->validated()['post_id'];
+
+        $posts_likes = Like::where('post_id', $validatedPostId)->get();
+
+        return response()->json($posts_likes);
+    }
 }
