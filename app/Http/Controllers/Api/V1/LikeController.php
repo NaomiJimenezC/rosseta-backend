@@ -25,9 +25,7 @@ class LikeController extends Controller
             return response()->json(['message' => 'Debes estar autenticado para ver los likes.'], 401);
         }
 
-        $posts = Post::with(['likes' => function ($query) {
-            $query->where('users_id', Auth::id());
-        }])->latest()->paginate(10); // Adjust pagination as needed
+        $posts = Like::where('user_id', Auth::id())->get();
 
         $posts->getCollection()->transform(function ($post) {
             $post->is_liked = $post->likes->isNotEmpty();
