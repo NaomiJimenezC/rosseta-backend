@@ -2,7 +2,6 @@
 
 namespace App\Events;
 
-use App\Models\Post;
 use App\Models\User;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
@@ -12,24 +11,24 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class PostLiked implements ShouldBroadcast
+class UserFollowed implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $post;
-    public $liker;
+    public $follower;
+    public $followee;
 
     /**
      * Create a new event instance.
      *
-     * @param  \App\Models\Post  $post
-     * @param  \App\Models\User  $liker
+     * @param  \App\Models\User  $follower The user who followed.
+     * @param  \App\Models\User  $followee The user who was followed.
      * @return void
      */
-    public function __construct(Post $post, User $liker)
+    public function __construct(User $follower, User $followee)
     {
-        $this->post = $post;
-        $this->liker = $liker;
+        $this->follower = $follower;
+        $this->followee = $followee;
     }
 
     /**
@@ -40,7 +39,7 @@ class PostLiked implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('user.' . $this->post->users_id),
+            new PrivateChannel('user.' . $this->followee->id),
         ];
     }
 

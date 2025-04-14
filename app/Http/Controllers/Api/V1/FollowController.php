@@ -2,10 +2,117 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Events\UserFollowed;
 use App\Http\Controllers\Controller;
+use App\Models\Follow;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class FollowController extends Controller
 {
-    //
+    /**
+     * Follow a user.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\User  $user The user to follow.
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function follow(Request $request, User $user)
+    {
+        if (!Auth::check()) {
+            return response()->json(['message' => 'Debes estar autenticado para seguir a otros usuarios.'], 401);
+        }
+
+        $followerId = Auth::id();
+        $followeeId = $user->id;
+
+        if ($followerId === $followeeId) {
+            return response()->json(['message' => 'No puedes seguirte a ti mismo.'], 400);
+        }
+
+        // Check if already following
+        $existingFollow = Follow::where('follower_id', $followerId)
+            ->where('followee_id', $followeeId)
+            ->first();
+
+        if ($existingFollow) {
+            return response()->json(['message' => 'Ya estás siguiendo a este usuario.'], 409); // 409 Conflict
+        }
+
+        try {
+            Follow::create([
+                'follower_id' => $followerId,
+                'followee_id' => $followeeId,
+            ]);
+
+            // Broadcast the UserFollowed event
+            $follower = Auth::user();
+            $followee = $user;
+            if ($followerId !== $followeeId) {
+                broadcast(new UserFollowed($follower, $followee));
+            }
+
+            return response()->json(['message' => 'Has comenzado a seguir a este usuario.'], 201);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error al seguir al usuario.', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Unfollow a user.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\User  $user The user to unfollow.
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function unfollow(Request $request, User $user)
+    {
+        if (!Auth::check()) {
+            return response()->json(['message' => 'Debes estar autenticado para dejar de seguir usuarios.'], 401);
+        }
+
+        $followerId = Auth::id();
+        $followeeId = $user->id;
+
+        $follow = Follow::where('follower_id', $followerId)
+            ->where('followee_id', $followeeId)
+            ->first();
+
+        if (!$follow) {
+            return response()->json(['message' => 'No estás siguiendo a este usuario.'], 404);
+        }
+
+        try {
+            $follow->delete();
+            return response()->json(['message' => 'Has dejado de seguir a este usuario.'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error al dejar de seguir al usuario.', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Get the followers of a specific user.
+     *
+     * @param  \App\Models\User  $user The user to get followers for.
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function followers(User $user)
+    {
+        $followers = $user->followers()->with('follower')->paginate(10); // Eager load follower details
+        return response()->json($followers);
+    }
+
+    /**
+     * Get the users that a specific user is following.
+     *
+     * @param  \App\Models\User  $user The user to get the following list for.
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function following(User $user)
+    {
+        $following = $user->following()->with('followee')->paginate(10); // Eager load followee details
+        return response()->json($following);
+    }
 }

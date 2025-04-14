@@ -1,5 +1,7 @@
     <?php
-    
+
+    use App\Http\Controllers\Api\V1\FollowController;
+    use App\Http\Controllers\Api\V1\LikeController;
     use Illuminate\Http\Request;
     use Illuminate\Support\Facades\Route;
     use App\Http\Controllers\Api\V1\AuthController;
@@ -47,7 +49,15 @@
         });
     
         //Rutas para los follows
-    
+
+        Route::middleware('auth:sanctum')->group(function () {
+            Route::post('/users/{user}/follow', [FollowController::class, 'follow'])->name('follows.store');
+            Route::delete('/users/{user}/follow', [FollowController::class, 'unfollow'])->name('follows.destroy');
+            Route::get('/users/{user}/followers', [FollowController::class, 'followers'])->name('follows.followers');
+            Route::get('/users/{user}/following', [FollowController::class, 'following'])->name('follows.following');
+        });
+
+
         //Rutas para el perfil del usuario
     
     });
