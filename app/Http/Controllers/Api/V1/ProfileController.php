@@ -68,7 +68,7 @@ class ProfileController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $user->update($request->validated());
+        $user->update($request);
 
         return response()->json($user);
     }

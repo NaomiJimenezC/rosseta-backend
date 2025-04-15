@@ -64,7 +64,6 @@ Route::group(['prefix' => 'v1'], function () {
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
         Route::get('/users/{identifier}', [ProfileController::class, 'showUser'])->name('users.show'); // Permite buscar por ID o username
-        Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
         Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
         Route::patch('/profile/password', [ProfileController::class, 'changePassword'])->name('profile.password.update');
         Route::patch('/profile/picture', [ProfileController::class, 'updateProfilePicture'])->name('profile.picture.update');
