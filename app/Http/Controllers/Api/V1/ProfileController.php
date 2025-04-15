@@ -31,8 +31,8 @@ class ProfileController extends Controller
      */
     public function showUser(string $identifier): JsonResponse
     {
-        $user = User::where('id', $identifier)->orWhere('username', $identifier)->first();
-
+        //$user = User::where('id', $identifier)->orWhere('username', $identifier)->first();
+        $user = User::where('username', $identifier)->firstOrFail();
         if (!$user) {
             return response()->json(['message' => 'Usuario no encontrado.'], 404);
         }

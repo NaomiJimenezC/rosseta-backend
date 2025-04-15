@@ -40,6 +40,9 @@ class AuthController extends Controller
         // Intenta autenticar al usuario con las credenciales proporcionadas
         if (Auth::attempt($credentials)) {
             $user = Auth::user();
+            if($user -> email_verified_that = null){
+                return response()->json(['error'=>'Email sin verificar'],400);
+            }
             // Retorna el token de acceso generado para el usuario
             return $this->respondWithToken($user);
         } else {
