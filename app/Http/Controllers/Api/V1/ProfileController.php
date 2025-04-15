@@ -62,13 +62,17 @@ class ProfileController extends Controller
             'phone_number' => 'nullable|string',
             'birthday' => 'nullable|date',
             'profile_picture_url' => 'nullable|string|url',
+            // Añade otros campos que quieras permitir editar
         ]);
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $user->update($request);
+        // Accede a los datos validados desde el objeto $validator
+        $validatedData = $validator->valid();
+
+        $user->update($validatedData);
 
         return response()->json($user);
     }
