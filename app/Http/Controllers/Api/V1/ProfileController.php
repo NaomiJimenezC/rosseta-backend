@@ -106,17 +106,21 @@ class ProfileController extends Controller
         $user = Auth::user();
 
         $validator = Validator::make($request->all(), [
-            'profile_picture_url' => 'required|string|url|max:255',
+            'profile_picture_url' => 'nullable|string|url|max:255',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $user->profile_picture_url = $request->input('profile_picture_url');
-        $user->save();
+        if ($request->has('profile_picture_url')) {
+            $user->profile_picture_url = $request->input('profile_picture_url');
+            $user->save();
 
-        return response()->json(['message' => 'URL de la foto de perfil actualizada correctamente.', 'profile_picture_url' => $user->profile_picture_url]);
+            return response()->json(['message' => 'URL de la foto de perfil actualizada correctamente.', 'profile_picture_url' => $user->profile_picture_url]);
+        }
+
+        return response()->json(['message' => 'No se proporcionó URL de la foto de perfil.'], 200);
     }
 
     /**

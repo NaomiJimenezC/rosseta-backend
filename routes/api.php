@@ -66,9 +66,8 @@ Route::group(['prefix' => 'v1'], function () {
         Route::get('/users/{identifier}', [ProfileController::class, 'showUser'])->name('users.show'); // Permite buscar por ID o username
         Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
         Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-        Route::put('/profile/password', [ProfileController::class, 'changePassword'])->name('profile.password.update');
         Route::patch('/profile/password', [ProfileController::class, 'changePassword'])->name('profile.password.update');
-        Route::post('/profile/picture', [ProfileController::class, 'updateProfilePicture'])->name('profile.picture.update');
+        Route::patch('/profile/picture', [ProfileController::class, 'updateProfilePicture'])->name('profile.picture.update');
         Route::delete('/profile/picture', [ProfileController::class, 'deleteProfilePicture'])->name('profile.picture.destroy');
         Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     });
