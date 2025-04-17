@@ -25,7 +25,7 @@ class AuthController extends Controller
     {
         // Validación de credenciales de inicio de sesión
         $validator = Validator::make($request->all(), [
-            'username' => 'required|username',
+            'username' => 'required|string',
             'password' => 'required|string|min:8',
         ]);
 
