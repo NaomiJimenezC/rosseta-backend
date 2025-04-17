@@ -22,34 +22,44 @@ class AuthController extends Controller
      * - Intenta autenticación y, si es exitosa, retorna el token.
      */
     public function login(Request $request)
-    {
-        // Validación de credenciales de inicio de sesión
-        $validator = Validator::make($request->all(), [
-            'username' => 'required|string',
-            'password' => 'required|string|min:8',
-        ]);
+{
+    // Validación de credenciales de inicio de sesión
+    $validator = Validator::make($request->all(), [
+        'username' => 'required|string',
+        'password' => 'required|string|min:8',
+    ]);
 
-        // Retorna errores de validación si existen
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
+    // Retorna errores de validación si existen
+    if ($validator->fails()) {
+        return response()->json($validator->errors(), 422);
+    }
+
+    // Extrae las credenciales del request
+    $credentials = $request->only('username', 'password');
+
+    // Intenta autenticar al usuario con las credenciales proporcionadas
+    if (Auth::attempt($credentials)) {
+        $user = Auth::user();
+        if($user -> email_verified_at == null){
+            return response()->json(['error'=>'Email sin verificar'],400);
         }
-
-        // Extrae las credenciales del request
-        $credentials = $request->only('username', 'password');
-
-        // Intenta autenticar al usuario con las credenciales proporcionadas
-        if (Auth::attempt($credentials)) {
+        // Retorna el token de acceso generado para el usuario
+        return $this->respondWithToken($user);
+    } else {
+        // Intenta autenticar buscando por nombre de usuario si el intento por email falla
+        if (Auth::attempt(['username' => $credentials['username'], 'password' => $credentials['password']])) {
             $user = Auth::user();
-            if($user -> email_verified_that = null){
+            if($user -> email_verified_at == null){
                 return response()->json(['error'=>'Email sin verificar'],400);
             }
             // Retorna el token de acceso generado para el usuario
             return $this->respondWithToken($user);
         } else {
-            // Retorna error si las credenciales son inválidas
+            // Retorna error si las credenciales son inválidas (ni email ni username)
             return response()->json(['error' => 'invalid_credentials'], 400);
         }
     }
+}
 
     public function register(Request $request)
     {
