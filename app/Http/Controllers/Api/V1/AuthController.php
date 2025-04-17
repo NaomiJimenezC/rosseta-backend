@@ -18,14 +18,14 @@ class AuthController extends Controller
 
     /**
      * Autentica al usuario y retorna un token de acceso.
-     * - Valida las credenciales (email y password).
+     * - Valida las credenciales (username y password).
      * - Intenta autenticación y, si es exitosa, retorna el token.
      */
     public function login(Request $request)
     {
         // Validación de credenciales de inicio de sesión
         $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
+            'username' => 'required|username',
             'password' => 'required|string|min:8',
         ]);
 
@@ -35,7 +35,7 @@ class AuthController extends Controller
         }
 
         // Extrae las credenciales del request
-        $credentials = $request->only('email', 'password');
+        $credentials = $request->only('username', 'password');
 
         // Intenta autenticar al usuario con las credenciales proporcionadas
         if (Auth::attempt($credentials)) {
