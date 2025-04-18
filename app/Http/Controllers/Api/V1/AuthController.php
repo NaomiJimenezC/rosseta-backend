@@ -68,7 +68,7 @@ class AuthController extends Controller
                 'email' => 'required|string|email|unique:users,email',
                 'password' => 'required|string|min:8|confirmed',
                 'phone_number' => 'nullable|string',
-                'birthday' => 'requiered|date',
+                'birthday' => 'required|date',
                 'profile_picture_url' => 'nullable|string|url',
             ]);
 
