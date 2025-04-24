@@ -17,10 +17,10 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table-> string("phone_number")->default(""); ;
+            $table-> string("phone_number")->nullable();
             $table->boolean("is_2fa_enabled");
             $table->date("birthday");
-            $table->string('profile_picture_url')->nullable(); // Añadido la foto de perfil
+            $table->string('profile_picture_url')->nullable();
             $table->string('verification_code')->nullable()->after('email_verified_at');
             $table->rememberToken();
             $table->timestamps();
