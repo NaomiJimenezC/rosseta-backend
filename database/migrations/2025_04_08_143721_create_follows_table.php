@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('followee_id')->constrained('users')->onDelete('cascade');
             $table->timestamp('created_at')->nullable();
 
-            $table->unique(['follower_id', 'followee_id']); // Evitar duplicados de seguimiento
+            $table->unique(['follower_id', 'followee_id']);
         });
     }
 
