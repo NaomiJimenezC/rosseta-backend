@@ -7,7 +7,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\PostController;
 use App\Http\Controllers\Api\V1\CommentController;
-use App\Http\Controllers\Api\V1\ProfileController; // Asegúrate de importar el controlador de perfil
+use App\Http\Controllers\Api\V1\ProfileController;
+use App\Http\Controllers\Api\V1\PostFolloweeController; // Importa el controlador del feed
 
 /*
 |--------------------------------------------------------------------------
@@ -38,16 +39,16 @@ Route::group(['prefix' => 'v1'], function () {
     Route::delete('/posts/{post_id}', [PostController::class, 'delete'])->middleware('auth:sanctum')->name('posts.destroy');
 
     // Rutas para los comentarios
-    Route::get('/comments', [CommentController::class, 'index'])->name('comments.index'); // Obtener comentarios de un post (requiere post_id en la query)
-    Route::post('/comments', [CommentController::class, 'store'])->middleware('auth:sanctum')->name('comments.store'); // Crear un nuevo comentario
-    Route::delete('/comments', [CommentController::class, 'delete'])->middleware('auth:sanctum')->name('comments.destroy'); // Eliminar un comentario
+    Route::get('/comments', [CommentController::class, 'index'])->name('comments.index');
+    Route::post('/comments', [CommentController::class, 'store'])->middleware('auth:sanctum')->name('comments.store');
+    Route::delete('/comments', [CommentController::class, 'delete'])->middleware('auth:sanctum')->name('comments.destroy');
 
     // Rutas para los me gustas
     Route::middleware('auth:sanctum')->group(function () {
-        Route::get('/users/liked', [LikeController::class, 'index'])->name('likes.index'); // Get all posts with like information for the authenticated user
+        Route::get('/users/liked', [LikeController::class, 'index'])->name('likes.index');
         Route::get('/posts/likes', [LikeController::class, 'show']) ->name('likes.show');
-        Route::post('/posts/{post}/like', [LikeController::class, 'store'])->name('likes.store'); // Like a specific post
-        Route::delete('/posts/{post}/dislike', [LikeController::class, 'destroy'])->name('likes.destroy'); // Unlike a specific post
+        Route::post('/posts/{post}/like', [LikeController::class, 'store'])->name('likes.store');
+        Route::delete('/posts/{post}/dislike', [LikeController::class, 'destroy'])->name('likes.destroy');
         Route::get('/posts/{post}/liked', [LikeController::class, 'hasLiked'])->name('posts.hasLiked');
     });
 
@@ -63,12 +64,15 @@ Route::group(['prefix' => 'v1'], function () {
     //Rutas para el perfil del usuario
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
-        Route::get('/users/{identifier}', [ProfileController::class, 'showUser'])->name('users.show'); // Permite buscar por ID o username
+        Route::get('/users/{identifier}', [ProfileController::class, 'showUser'])->name('users.show');
         Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
         Route::patch('/profile/password', [ProfileController::class, 'changePassword'])->name('profile.password.update');
         Route::patch('/profile/picture', [ProfileController::class, 'updateProfilePicture'])->name('profile.picture.update');
         Route::delete('/profile/picture', [ProfileController::class, 'deleteProfilePicture'])->name('profile.picture.destroy');
         Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     });
+
+    // Ruta para el feed de los usuarios seguidos
+    Route::middleware('auth:sanctum')->get('/feed', [PostFolloweeController::class, 'index'])->name('feed.index');
 
 });
