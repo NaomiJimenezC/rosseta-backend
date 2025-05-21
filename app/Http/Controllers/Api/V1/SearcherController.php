@@ -22,10 +22,12 @@ class SearcherController extends Controller
 
         $posts = Post::where('content', 'like', "%{$query}%")
             ->orWhere('caption', 'like', "%{$query}%")
+            ->orWhereHas('user', function ($q) use ($query) {
+                $q->where('username', 'like', "%{$query}%");
+            })
             ->get();
 
-        $users = User::where('username', 'like', "%{$query}%")
-            ->get();
+        $users = User::where('username', 'like', "%{$query}%")->get();
 
         $usersFormatted = UserResource::collection($users);
 
