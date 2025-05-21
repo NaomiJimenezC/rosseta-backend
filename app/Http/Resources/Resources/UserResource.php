@@ -10,10 +10,15 @@ class UserResource extends JsonResource
     /**
      * Transform the resource into an array.
      *
+     * @param  \Illuminate\Http\Request  $request
      * @return array<string, mixed>
      */
     public function toArray(Request $request): array
     {
-        return parent::toArray($request);
+        return [
+            'id'                   => $this->id,
+            'username'             => $this->username,
+            'profile_picture_url'  => $this->profile_picture_url,
+        ];
     }
 }
