@@ -8,7 +8,8 @@ use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\PostController;
 use App\Http\Controllers\Api\V1\CommentController;
 use App\Http\Controllers\Api\V1\ProfileController;
-use App\Http\Controllers\Api\V1\PostFolloweeController; // Importa el controlador del feed
+use App\Http\Controllers\Api\V1\PostFolloweeController;
+use App\Http\Controllers\Api\V1\SearcherController;
 
 /*
 |--------------------------------------------------------------------------
@@ -26,6 +27,9 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::group(['prefix' => 'v1'], function () {
+    // Ruta de búsqueda posts y usuarios
+    Route::get('/search', [SearcherController::class, 'search'])->name('search');
+
     // Rutas de autenticación
     Route::post('/register', [AuthController::class, 'register'])->name('register');
     Route::post('/login', [AuthController::class, 'login'])->name('login');
@@ -46,13 +50,13 @@ Route::group(['prefix' => 'v1'], function () {
     // Rutas para los me gustas
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/users/liked', [LikeController::class, 'index'])->name('likes.index');
-        Route::get('/posts/likes', [LikeController::class, 'show']) ->name('likes.show');
+        Route::get('/posts/likes', [LikeController::class, 'show'])->name('likes.show');
         Route::post('/posts/{post}/like', [LikeController::class, 'store'])->name('likes.store');
         Route::delete('/posts/{post}/dislike', [LikeController::class, 'destroy'])->name('likes.destroy');
         Route::get('/posts/{post}/liked', [LikeController::class, 'hasLiked'])->name('posts.hasLiked');
     });
 
-    //Rutas para los follows
+    // Rutas para los follows
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/users/{user}/follow', [FollowController::class, 'follow'])->name('follows.store');
         Route::delete('/users/{user}/unfollow', [FollowController::class, 'unfollow'])->name('follows.destroy');
@@ -61,7 +65,7 @@ Route::group(['prefix' => 'v1'], function () {
         Route::get('/users/{user}/is-following', [FollowController::class, 'isFollowing'])->name('follows.isFollowing');
     });
 
-    //Rutas para el perfil del usuario
+    // Rutas para el perfil del usuario
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
         Route::get('/users/{identifier}', [ProfileController::class, 'showUser'])->name('users.show');

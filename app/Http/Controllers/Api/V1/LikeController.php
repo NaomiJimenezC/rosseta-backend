@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
-class LikeController extends Controller
+class  LikeController extends Controller
 {
     /**
      * Display a listing of posts with like information for the authenticated user.

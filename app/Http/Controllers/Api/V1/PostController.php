@@ -20,7 +20,6 @@ class PostController extends Controller
 
         $userId = $request->input('user_id');
 
-        // Assuming you have a Post model with a user_id foreign key
         $posts = Post::where('users_id', $userId)->get();
 
         return response()->json($posts);
@@ -40,7 +39,6 @@ class PostController extends Controller
         return response()->json($post);
     }
     public function store(Request $request){
-        // Verificar si el usuario está autenticado
         if (!Auth::check()) {
             return response()->json(['message' => 'Debes estar autenticado para crear un post.'], 401);
         }

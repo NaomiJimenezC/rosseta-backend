@@ -26,7 +26,7 @@ class User extends Authenticatable
         'phone_number',
         'is_2fa_enabled',
         'birthday',
-        'profile_picture_url', // Añadido
+        'profile_picture_url',
     ];
 
     /**
