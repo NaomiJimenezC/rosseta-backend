@@ -10,17 +10,13 @@ use Illuminate\Support\Facades\Auth;
 
 class PostController extends Controller
 {
-    public function index(Request $request){
-        $validator = Validator::make($request->all(), [
-            'user_id' => 'required',
-        ]);
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
+    public function index($user_id)
+    {
+        if (!is_numeric($user_id)) {
+            return response()->json(['error' => 'Invalid user id'], 400);
         }
 
-        $userId = $request->input('user_id');
-
-        $posts = Post::where('users_id', $userId)->get();
+        $posts = Post::where('users_id', $user_id)->get();
 
         return response()->json($posts);
     }
