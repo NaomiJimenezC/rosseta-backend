@@ -35,5 +35,7 @@ class SearcherController extends Controller
             'posts' => $posts,
             'users' => $usersFormatted,
         ]);
+        //TODO añadir paginación
+        //mirar laravel api
     }
 }
