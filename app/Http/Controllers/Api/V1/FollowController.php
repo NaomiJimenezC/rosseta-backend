@@ -6,6 +6,7 @@ use App\Events\UserFollowed;
 use App\Http\Controllers\Controller;
 use App\Models\Follow;
 use App\Models\User;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -34,7 +35,6 @@ class FollowController extends Controller
             return response()->json(['message' => 'No puedes seguirte a ti mismo.'], 400);
         }
 
-        // Check if already following
         $existingFollow = Follow::where('follower_id', $followerId)
             ->where('followee_id', $followeeId)
             ->first();
@@ -49,7 +49,6 @@ class FollowController extends Controller
                 'followee_id' => $followeeId,
             ]);
 
-            // Broadcast the UserFollowed event
             $follower = Auth::user();
             $followee = $user;
             if ($followerId !== $followeeId) {
@@ -111,7 +110,7 @@ class FollowController extends Controller
         try {
             $followers = $user->followers()->with('follower')->paginate(10); // Eager load follower details
             return response()->json($followers);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error fetching followers for user ' . $user->id . ': ' . $e->getMessage());
             return response()->json(['message' => 'Error al obtener los seguidores.'], 500);
         }
@@ -128,7 +127,7 @@ class FollowController extends Controller
         try {
             $following = $user->following()->with('followee')->paginate(10); // Eager load followee details
             return response()->json($following);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error fetching following for user ' . $user->id . ': ' . $e->getMessage());
             return response()->json(['message' => 'Error al obtener los usuarios seguidos.'], 500);
         }
@@ -138,12 +137,9 @@ class FollowController extends Controller
     {
         try {
             $currentUser = Auth::user();
-
             if (!$currentUser) {
                 return response()->json(['message' => 'No estás autenticado.'], 401);
             }
-
-            // Verificar si el usuario autenticado está intentando seguirse a sí mismo
             if ($currentUser->id === $user->id) {
                 return response()->json(['message' => 'No puedes seguirte a ti mismo.'], 400);
             }
@@ -152,7 +148,6 @@ class FollowController extends Controller
 
             return response()->json(['isFollowing' => $isFollowing], 200);
         } catch (\Exception $e) {
-            //Log::error("Error al verificar si el usuario {$currentUser->id ?? 'desconocido'} sigue al usuario {$user->id}: " . $e->getMessage());
             return response()->json(['message' => 'Error interno al procesar la solicitud.', 'error' => $e->getMessage()], 500);
         }
     }

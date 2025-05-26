@@ -3,10 +3,8 @@
 namespace App\Events;
 
 use App\Models\User;
-use Illuminate\Broadcasting\Channel;
-use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
+use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
@@ -15,15 +13,14 @@ class UserFollowed implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $follower;
-    public $followee;
+    public User $follower;
+    public User $followee;
 
     /**
      * Create a new event instance.
      *
-     * @param  \App\Models\User  $follower The user who followed.
-     * @param  \App\Models\User  $followee The user who was followed.
-     * @return void
+     * @param  \App\Models\User  $follower  The user who followed.
+     * @param  \App\Models\User  $followee  The user who was followed.
      */
     public function __construct(User $follower, User $followee)
     {
@@ -32,19 +29,41 @@ class UserFollowed implements ShouldBroadcast
     }
 
     /**
-     * Get the channels the event should broadcast on.
+     * The name of the event as seen by the client.
      *
-     * @return array<int, \Illuminate\Broadcasting\Channel>
+     * @return string
      */
-    public function broadcastOn(): array
+    public function broadcastAs(): string
+    {
+        return 'user.followed';
+    }
+
+    /**
+     * Data to broadcast to the client.
+     *
+     * @return array
+     */
+    public function broadcastWith(): array
     {
         return [
-            new PrivateChannel('user.' . $this->followee->id),
+            'follower_id'   => $this->follower->id,
+            'follower_name' => $this->follower->name,
         ];
     }
 
     /**
-     * The name of the queue to route broadcast messages on.
+     * Get the channels the event should broadcast on.
+     *
+     * @return \Illuminate\Broadcasting\Channel|\Illuminate\Broadcasting\Channel[]
+     */
+    public function broadcastOn()
+    {
+        // Usamos el canal privado de notificaciones del followee
+        return new PrivateChannel('notifications.' . $this->followee->id);
+    }
+
+    /**
+     * Queue name for broadcasting.
      *
      * @return string|null
      */

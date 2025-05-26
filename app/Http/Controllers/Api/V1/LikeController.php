@@ -11,34 +11,27 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
-class  LikeController extends Controller
+class LikeController extends Controller
 {
     /**
-     * Display a listing of posts with like information for the authenticated user.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
+     * Display a listing of likes for the authenticated user.
      */
     public function index(): \Illuminate\Http\JsonResponse
     {
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return response()->json(['message' => 'Debes estar autenticado para ver los likes.'], 401);
         }
 
-        $posts = Like::all();
-
-        return response()->json($posts);
+        $likes = Like::where('user_id', Auth::id())->get();
+        return response()->json($likes);
     }
 
     /**
      * Store a newly created like in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
      */
-    public function store(Request $request)
+    public function store(Request $request): \Illuminate\Http\JsonResponse
     {
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return response()->json(['message' => 'Debes estar autenticado para dar me gusta.'], 401);
         }
 
@@ -53,44 +46,45 @@ class  LikeController extends Controller
         $postId = $request->input('post_id');
         $userId = Auth::id();
 
-        // Check if the user has already liked the post
-        $existingLike = Like::where('post_id', $postId)
-            ->where('user_id', $userId)
-            ->first();
-
-        if ($existingLike) {
-            return response()->json(['message' => 'Ya has dado me gusta a esta publicación.'], 409); // 409 Conflict
+        // Evitar likes duplicados
+        if (Like::where('post_id', $postId)->where('user_id', $userId)->exists()) {
+            return response()->json(['message' => 'Ya has dado me gusta a esta publicación.'], 409);
         }
 
         try {
+            // Crear el like
             $like = Like::create([
                 'post_id' => $postId,
                 'user_id' => $userId,
             ]);
 
-            // Broadcast the PostLiked event
+            // Disparar el evento correcto: primero el usuario, luego el post
             $post = Post::findOrFail($postId);
-            if ($post->users_id !== $userId) {
-                broadcast(new PostLiked($post, Auth::user()));
+            if ($post->user_id !== $userId) {
+                broadcast(new PostLiked(Auth::user(), $post));
             }
 
             return response()->json(['message' => 'Me gusta añadido correctamente.'], 201);
+
         } catch (QueryException $e) {
-            return response()->json(['message' => 'Error al dar me gusta (base de datos).', 'error' => $e->getMessage()], 500);
+            return response()->json([
+                'message' => 'Error al dar me gusta (base de datos).',
+                'error' => $e->getMessage(),
+            ], 500);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Error al dar me gusta.', 'error' => $e->getMessage()], 500);
+            return response()->json([
+                'message' => 'Error al dar me gusta.',
+                'error' => $e->getMessage(),
+            ], 500);
         }
     }
 
     /**
-     * Remove the specified like from storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
+     * Remove the specified like.
      */
-    public function destroy(Request $request)
+    public function destroy(Request $request): \Illuminate\Http\JsonResponse
     {
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return response()->json(['message' => 'Debes estar autenticado para quitar el me gusta.'], 401);
         }
 
@@ -105,11 +99,8 @@ class  LikeController extends Controller
         $postId = $request->input('post_id');
         $userId = Auth::id();
 
-        $like = Like::where('post_id', $postId)
-            ->where('user_id', $userId)
-            ->first();
-
-        if (!$like) {
+        $like = Like::where('post_id', $postId)->where('user_id', $userId)->first();
+        if (! $like) {
             return response()->json(['message' => 'No has dado me gusta a esta publicación.'], 404);
         }
 
@@ -117,12 +108,22 @@ class  LikeController extends Controller
             $like->delete();
             return response()->json(['message' => 'Me gusta eliminado correctamente.'], 200);
         } catch (QueryException $e) {
-            return response()->json(['message' => 'Error al quitar el me gusta (base de datos).', 'error' => $e->getMessage()], 500);
+            return response()->json([
+                'message' => 'Error al quitar el me gusta (base de datos).',
+                'error' => $e->getMessage(),
+            ], 500);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Error al quitar el me gusta.', 'error' => $e->getMessage()], 500);
+            return response()->json([
+                'message' => 'Error al quitar el me gusta.',
+                'error' => $e->getMessage(),
+            ], 500);
         }
     }
-    public function show(Request $request)
+
+    /**
+     * Show all likes for a post.
+     */
+    public function show(Request $request): \Illuminate\Http\JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'post_id' => 'required|exists:posts,id',
@@ -132,26 +133,25 @@ class  LikeController extends Controller
             return response()->json($validator->errors(), 422);
         }
 
-        $validatedPostId = $validator->validated()['post_id'];
+        $postId = $validator->validated()['post_id'];
+        $likes  = Like::where('post_id', $postId)->get();
 
-        $posts_likes = Like::where('post_id', $validatedPostId)->get();
-
-        return response()->json($posts_likes);
+        return response()->json($likes);
     }
 
-    public function hasLiked(Request $request, $postId)
+    /**
+     * Check if the authenticated user has liked a post.
+     */
+    public function hasLiked(Request $request, $postId): \Illuminate\Http\JsonResponse
     {
-        if (!Auth::check()) {
-            return response()->json(['hasLiked' => false]); // O podrías devolver un 401
+        if (! Auth::check()) {
+            return response()->json(['hasLiked' => false]);
         }
 
-        $userId = Auth::id();
-
-        $hasLiked = Like::where('user_id', $userId)
+        $hasLiked = Like::where('user_id', Auth::id())
             ->where('post_id', $postId)
             ->exists();
 
         return response()->json(['hasLiked' => $hasLiked]);
     }
-
 }

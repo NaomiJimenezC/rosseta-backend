@@ -36,7 +36,7 @@ class NewComment implements ShouldBroadcast
     /**
      * Get the channels the event should broadcast on.
      *
-     * @return array
+     * @return PrivateChannel
      */
     public function broadcastOn()
     {

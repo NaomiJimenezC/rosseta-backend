@@ -2,12 +2,10 @@
 
 namespace App\Events;
 
-use App\Models\Post;
 use App\Models\User;
-use Illuminate\Broadcasting\Channel;
-use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
+use App\Models\Post;
 use Illuminate\Broadcasting\PrivateChannel;
+use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
@@ -16,41 +14,32 @@ class PostLiked implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $post;
-    public $liker;
+    public User $liker;
+    public Post $post;
 
-    /**
-     * Create a new event instance.
-     *
-     * @param  \App\Models\Post  $post
-     * @param  \App\Models\User  $liker
-     * @return void
-     */
-    public function __construct(Post $post, User $liker)
+    public function __construct(User $liker, Post $post)
     {
-        $this->post = $post;
         $this->liker = $liker;
+        $this->post  = $post;
     }
 
-    /**
-     * Get the channels the event should broadcast on.
-     *
-     * @return array<int, \Illuminate\Broadcasting\Channel>
-     */
-    public function broadcastOn(): array
+    public function broadcastOn()
+    {
+        // El autor del post recibirá la notificación
+        return new PrivateChannel('notifications.' . $this->post->user_id);
+    }
+
+    public function broadcastAs(): string
+    {
+        return 'post.liked';
+    }
+
+    public function broadcastWith(): array
     {
         return [
-            new PrivateChannel('user.' . $this->post->users_id),
+            'post_id'    => $this->post->id,
+            'liker_id'   => $this->liker->id,
+            'liker_name' => $this->liker->name,
         ];
-    }
-
-    /**
-     * The name of the queue to route broadcast messages on.
-     *
-     * @return string|null
-     */
-    public function broadcastQueue(): ?string
-    {
-        return 'broadcasts';
     }
 }
