@@ -1,7 +1,9 @@
 <?php
 
+use App\Http\Controllers\Api\V1\ConversationController;
 use App\Http\Controllers\Api\V1\FollowController;
 use App\Http\Controllers\Api\V1\LikeController;
+use App\Http\Controllers\Api\V1\MessageController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\AuthController;
@@ -78,5 +80,17 @@ Route::group(['prefix' => 'v1'], function () {
 
     // Ruta para el feed de los usuarios seguidos
     Route::middleware('auth:sanctum')->get('/feed', [PostFolloweeController::class, 'index'])->name('feed.index');
+
+    // Conversaciones (chats) del usuario
+    Route::get('/conversations', [ConversationController::class, 'index'])->name('conversations.index');
+    Route::get('/conversations/{conversation}', [ConversationController::class, 'show'])->name('conversations.show');
+
+    // Mensajes dentro de una conversación
+    Route::get('/conversations/{conversation}/messages', [MessageController::class, 'index'])
+        ->name('conversations.messages.index');
+    Route::post('/conversations/{conversation}/messages', [MessageController::class, 'store'])
+        ->name('conversations.messages.store');
+    // Contador de chats pendientes
+    Route::get('/conversations/unread-count', [ConversationController::class, 'unreadCount'])->name('conversations.unreadCount');
 
 });

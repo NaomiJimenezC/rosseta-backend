@@ -22,7 +22,6 @@ class DirectMessageSent implements ShouldBroadcast
 
     public function broadcastOn()
     {
-        // El destinatario del mensaje escucha aquí
         return new PrivateChannel('chat.' . $this->message->conversation_id);
     }
 
