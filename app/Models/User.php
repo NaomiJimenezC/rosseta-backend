@@ -102,4 +102,16 @@ class User extends Authenticatable
         return $this->hasMany(Post::class, 'users_id');
     }
 
+    public function conversations()
+    {
+        return $this->belongsToMany(Conversation::class)
+        ->withPivot('joined_at')
+        ->withTimestamps();
+        }
+
+    public function messages()
+    {
+        return $this->hasMany(Message::class, 'sender_id');
+        }
+
 }
