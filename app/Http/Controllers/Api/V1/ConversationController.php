@@ -23,7 +23,7 @@ class ConversationController extends Controller
             $user = $request->user();
 
             $conversations = $user->conversations()
-                ->with(['users:id,name', 'messages' => function($q) {
+                ->with(['users:id,username', 'messages' => function($q) {
                     $q->orderBy('created_at', 'desc')->limit(1);
                 }])
                 ->orderByDesc('last_message_at')
@@ -55,7 +55,7 @@ class ConversationController extends Controller
                 ]);
 
             // Cargar participantes
-            $conversation->load('users:id,name');
+            $conversation->load('users:id,username');
 
             // Obtener mensajes paginados separado para evitar eager-load paginate
             $messages = $conversation->messages()
