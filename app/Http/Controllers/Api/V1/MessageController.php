@@ -15,18 +15,41 @@ use Exception;
 
 class MessageController extends Controller
 {
-    /**
-     * Enviar un mensaje dentro de una conversación
-     */
+    public function index(Request $request, $conversationId)
+    {
+        try {
+            $conversation = Conversation::findOrFail($conversationId);
+            $this->authorize('view', $conversation);
+
+            $messages = $conversation->messages()
+                ->orderBy('created_at')
+                ->paginate(50);
+
+            return response()->json($messages, 200);
+
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['error' => 'Conversación no encontrada.'], 404);
+
+        } catch (AuthorizationException $e) {
+            return response()->json(['error' => 'No tienes permiso para ver los mensajes de esta conversación.'], 403);
+
+        } catch (Exception $e) {
+            Log::error('Error al listar mensajes', [
+                'conversation_id' => $conversationId,
+                'user_id'         => optional($request->user())->id,
+                'exception'       => $e->getMessage(),
+                'trace'           => $e->getTraceAsString()
+            ]);
+            return response()->json(['error' => 'Ha ocurrido un error al cargar los mensajes.'], 500);
+        }
+    }
+
     public function store(Request $request, $conversationId)
     {
         try {
-            $request->validate([
-                'content' => 'required|string'
-            ]);
+            $request->validate(['content' => 'required|string']);
 
             $conversation = Conversation::findOrFail($conversationId);
-
             $this->authorize('view', $conversation);
 
             $message = Message::create([
@@ -42,37 +65,29 @@ class MessageController extends Controller
             return response()->json($message, 201);
 
         } catch (ModelNotFoundException $e) {
-            return response()->json([
-                'error' => 'Conversación no encontrada.'
-            ], 404);
+            return response()->json(['error' => 'Conversación no encontrada.'], 404);
 
         } catch (AuthorizationException $e) {
-            return response()->json([
-                'error' => 'No tienes permiso para acceder a esta conversación.'
-            ], 403);
+            return response()->json(['error' => 'No tienes permiso para acceder a esta conversación.'], 403);
 
         } catch (QueryException $e) {
             Log::error('Error SQL al enviar mensaje', [
                 'conversation_id' => $conversationId,
                 'user_id'         => optional($request->user())->id,
-                'message'         => $request->input('content'),
+                'content'         => $request->input('content'),
                 'sql_error'       => $e->getMessage()
             ]);
-            return response()->json([
-                'error' => 'Error en la base de datos al guardar el mensaje.'
-            ], 500);
+            return response()->json(['error' => 'Error en la base de datos al guardar el mensaje.'], 500);
 
         } catch (Exception $e) {
             Log::error('Error inesperado al enviar mensaje', [
                 'conversation_id' => $conversationId,
                 'user_id'         => optional($request->user())->id,
-                'message'         => $request->input('content'),
+                'content'         => $request->input('content'),
                 'exception'       => $e->getMessage(),
                 'trace'           => $e->getTraceAsString()
             ]);
-            return response()->json([
-                'error' => 'Ha ocurrido un error inesperado.'
-            ], 500);
+            return response()->json(['error' => 'Ha ocurrido un error inesperado.'], 500);
         }
     }
 }
