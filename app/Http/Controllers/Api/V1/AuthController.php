@@ -23,39 +23,30 @@ class AuthController extends Controller
      */
     public function login(Request $request)
 {
-    // Validación de credenciales de inicio de sesión
     $validator = Validator::make($request->all(), [
         'username' => 'required|string',
         'password' => 'required|string|min:8',
     ]);
 
-    // Retorna errores de validación si existen
     if ($validator->fails()) {
         return response()->json($validator->errors(), 422);
     }
-
-    // Extrae las credenciales del request
     $credentials = $request->only('username', 'password');
 
-    // Intenta autenticar al usuario con las credenciales proporcionadas
     if (Auth::attempt($credentials)) {
         $user = Auth::user();
         if($user -> email_verified_at == null){
             return response()->json(['error'=>'Email sin verificar'],400);
         }
-        // Retorna el token de acceso generado para el usuario
         return $this->respondWithToken($user);
     } else {
-        // Intenta autenticar buscando por nombre de usuario si el intento por email falla
         if (Auth::attempt(['username' => $credentials['username'], 'password' => $credentials['password']])) {
             $user = Auth::user();
             if($user -> email_verified_at == null){
                 return response()->json(['error'=>'Email sin verificar'],400);
             }
-            // Retorna el token de acceso generado para el usuario
             return $this->respondWithToken($user);
         } else {
-            // Retorna error si las credenciales son inválidas (ni email ni username)
             return response()->json(['error' => 'invalid_credentials'], 400);
         }
     }
@@ -90,11 +81,9 @@ class AuthController extends Controller
             // Generar código de verificación
             $verificationCode = Str::random(6);
 
-            // Guardar el código de verificación en el usuario
             $user->verification_code = $verificationCode;
             $user->save();
 
-            // Enviar correo electrónico con el código de verificación
             Mail::to($user->email)->send(new VerificationCodeMail($verificationCode));
 
             return response()->json(['message' => 'Usuario registrado exitosamente. Se ha enviado un código de verificación a tu correo electrónico.', 'user' => $user], 201);
@@ -143,10 +132,7 @@ class AuthController extends Controller
      */
     public function logout(Request $request)
     {
-        // Elimina todos los tokens asociados al usuario autenticado
         $request->user()->tokens()->delete();
-
-        // Retorna mensaje confirmando el cierre de sesión
         return response()->json(['message' => 'Sesión cerrada correctamente'], 200);
     }
 

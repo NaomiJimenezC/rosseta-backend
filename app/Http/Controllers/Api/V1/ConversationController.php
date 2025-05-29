@@ -48,16 +48,13 @@ class ConversationController extends Controller
             $user = $request->user();
             $this->authorize('view', $conversation);
 
-            // Marcar como leído: actualiza last_read_at en pivot
             $user->conversations()
                 ->updateExistingPivot($conversation->id, [
                     'last_read_at' => now(),
                 ]);
 
-            // Cargar participantes
             $conversation->load('users:id,username');
 
-            // Obtener mensajes paginados separado para evitar eager-load paginate
             $messages = $conversation->messages()
                 ->orderBy('created_at')
                 ->paginate(50);
