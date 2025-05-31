@@ -108,13 +108,14 @@ class FollowController extends Controller
     public function getFollowers(User $user): JsonResponse
     {
         try {
-            $followers = $user->followers()->with('follower')->paginate(10); // Eager load follower details
+            $followers = $user->followers()->paginate(10);
             return response()->json($followers);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             Log::error('Error fetching followers for user ' . $user->id . ': ' . $e->getMessage());
             return response()->json(['message' => 'Error al obtener los seguidores.'], 500);
         }
     }
+
 
     /**
      * Get the users that a specific user is following.
