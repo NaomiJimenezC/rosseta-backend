@@ -60,6 +60,12 @@ class MessageController extends Controller
 
             $conversation->update(['last_message_at' => now()]);
 
+            Log::info("Emitiendo evento DirectMessageSent", [
+                'message_id' => $message->id,
+                'conversation_id' => $conversation->id,
+                'sender_id' => $message->sender_id
+            ]);
+
             broadcast(new DirectMessageSent($message))->toOthers();
 
             return response()->json($message, 201);
