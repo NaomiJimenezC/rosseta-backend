@@ -6,6 +6,7 @@ use App\Events\UserFollowed;
 use App\Http\Controllers\Controller;
 use App\Models\Follow;
 use App\Models\User;
+use App\Notifications\FollowNotification;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -52,7 +53,7 @@ class FollowController extends Controller
             $follower = Auth::user();
             $followee = $user;
             if ($followerId !== $followeeId) {
-                broadcast(new UserFollowed($follower, $followee));
+                $followee->notify(new FollowNotification($follower));
             }
 
             return response()->json(['message' => 'Has comenzado a seguir a este usuario.'], 201);
@@ -111,7 +112,7 @@ class FollowController extends Controller
             $followers = $user->followers()->paginate(10);
             return response()->json($followers);
         } catch (\Exception $e) {
-            Log::error('Error fetching followers for user ' . $user->id . ': ' . $e->getMessage());
+             Log::error('Error fetching followers for user ' . $user->id . ': ' . $e->getMessage());
             return response()->json(['message' => 'Error al obtener los seguidores.'], 500);
         }
     }

@@ -16,7 +16,7 @@ class NotificationController extends Controller
         $notifications = $request->user()
             ->notifications()
             ->latest()
-            ->limit(50)
+            ->limit(20)
             ->get();
 
         return response()->json($notifications);
