@@ -41,7 +41,7 @@ class FollowController extends Controller
             ->first();
 
         if ($existingFollow) {
-            return response()->json(['message' => 'Ya estás siguiendo a este usuario.'], 409); // 409 Conflict
+            return response()->json(['message' => 'Ya estás siguiendo a este usuario.'], 409);
         }
 
         try {
@@ -54,6 +54,7 @@ class FollowController extends Controller
             $followee = $user;
             if ($followerId !== $followeeId) {
                 $followee->notify(new FollowNotification($follower));
+                Log::info("Notificación de follow enviada a: " . $followee->id);
             }
 
             return response()->json(['message' => 'Has comenzado a seguir a este usuario.'], 201);

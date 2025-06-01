@@ -136,7 +136,6 @@ class PostController extends Controller
                         $excerpt = "@{$username}";
                     }
 
-                    // Disparar la notificación en BD
                     $user->notify(new MentionNotification(
                         $mentioner,
                         $contextType,
