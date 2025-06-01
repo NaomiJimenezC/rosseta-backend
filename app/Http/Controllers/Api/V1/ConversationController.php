@@ -110,7 +110,7 @@ class ConversationController extends Controller
                 ]);
             }
 
-            $conversation->load('users:id,name');
+            $conversation->load('users:id,username');
 
             return response()->json(['data' => $conversation], 201);
         } catch (ModelNotFoundException $e) {

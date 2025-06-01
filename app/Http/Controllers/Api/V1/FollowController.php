@@ -127,7 +127,7 @@ class FollowController extends Controller
     public function getFollowing(User $user): JsonResponse
     {
         try {
-            $following = $user->following()->with('followee')->paginate(10); // Eager load followee details
+            $following = $user->following()->paginate(10);
             return response()->json($following);
         } catch (Exception $e) {
             Log::error('Error fetching following for user ' . $user->id . ': ' . $e->getMessage());
