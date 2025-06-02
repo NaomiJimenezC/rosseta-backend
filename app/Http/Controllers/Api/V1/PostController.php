@@ -23,16 +23,11 @@ class PostController extends Controller
         return response()->json($posts);
     }
 
-    public function getPost(Request $request)
+    public function getPost($post_id)
     {
-        $validator = Validator::make($request->all(), [
-            'post_id' => 'required',
-        ]);
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 404);
+        if(! is_numeric($post_id)) {
+            return response()->json(['error' => 'Invalid post id'], 400);
         }
-
-        $postId = $request->input('post_id');
         $post   = Post::where('id', $postId)->first() ?? abort(404);
         return response()->json($post);
     }
