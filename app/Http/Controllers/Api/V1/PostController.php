@@ -28,7 +28,7 @@ class PostController extends Controller
         if(! is_numeric($post_id)) {
             return response()->json(['error' => 'Invalid post id'], 400);
         }
-        $post   = Post::where('id', $postId)->first() ?? abort(404);
+        $post   = Post::where('id', $post_id)->first() ?? abort(404);
         return response()->json($post);
     }
 
