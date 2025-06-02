@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Resources\UserResource;
 use App\Models\Comment;
 use App\Models\Post;
 use Illuminate\Http\Request;
@@ -23,9 +24,27 @@ class CommentController extends Controller
         }
 
         $postId = $request->input('post_id');
-        $comments = Comment::where('post_id', $postId)->with('user')->latest()->get(); // Eager load user for comment author info
 
-        return response()->json($comments);
+        // Traemos los comentarios con su usuario (solo para tener los datos en memoria).
+        $comments = Comment::where('post_id', $postId)
+            ->with('user')
+            ->latest()
+            ->get();
+
+        // Mapeamos cada comentario para que el usuario vaya dentro de UserResource
+        $result = $comments->map(function($c) {
+            return [
+                'id'         => $c->id,
+                'post_id'    => $c->post_id,
+                'user_id'    => $c->user_id,
+                'content'    => $c->content,
+                'created_at' => $c->created_at,
+                'updated_at' => $c->updated_at,
+                'user'       => new UserResource($c->user),
+            ];
+        });
+
+        return response()->json($result);
     }
 
     public function store(Request $request)
@@ -49,23 +68,28 @@ class CommentController extends Controller
                 'post_id' => $request->input('post_id'),
                 'content' => $request->input('content'),
             ]);
+
             $comment->load('user');
 
-            // Obtener el post al que pertenece el comentario
             $post = Post::findOrFail($request->input('post_id'));
-
-            // Obtener el ID del creador del post
             $postCreatorId = $post->users_id;
-
-            // Obtener el ID del usuario que creó el comentario
-            $commenterId = Auth::id();
-
-            // Verificar que el creador del post no sea el mismo que el que comenta
+            $commenterId   = Auth::id();
             if ($postCreatorId !== $commenterId) {
                 broadcast(new NewComment($comment));
             }
 
-            return response()->json(['message' => 'Comentario creado correctamente.', 'comment' => $comment], 201);
+            $responseData = [
+                'id'         => $comment->id,
+                'post_id'    => $comment->post_id,
+                'user_id'    => $comment->user_id,
+                'content'    => $comment->content,
+                'created_at' => $comment->created_at,
+                'updated_at' => $comment->updated_at,
+                'user'       => new UserResource($comment->user),
+            ];
+
+            return response()->json(['message' => 'Comentario creado correctamente.', 'comment' => $responseData], 201);
+
         } catch (\Exception $e) {
             return response()->json(['message' => 'Error al crear el comentario.', 'error' => $e->getMessage()], 500);
         }
@@ -84,11 +108,9 @@ class CommentController extends Controller
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
         }
-
         $commentId = $request->input('comment_id');
         $comment = Comment::findOrFail($commentId);
 
-        // Check if the authenticated user is the owner of the comment
         if (Auth::id() === $comment->user_id) {
             try {
                 $comment->delete();

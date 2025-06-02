@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Resources\PostResource;
 use App\Models\Post;
 use App\Models\User;
 use App\Notifications\MentionNotification;
@@ -19,17 +20,24 @@ class PostController extends Controller
             return response()->json(['error' => 'Invalid user id'], 400);
         }
 
-        $posts = Post::where('users_id', $user_id)->get();
-        return response()->json($posts);
+        $posts = Post::with('user')
+            ->where('users_id', $user_id)
+            ->get();
+
+        return PostResource::collection($posts);
     }
 
     public function getPost($post_id)
     {
-        if(! is_numeric($post_id)) {
+        if (! is_numeric($post_id)) {
             return response()->json(['error' => 'Invalid post id'], 400);
         }
-        $post   = Post::where('id', $post_id)->first() ?? abort(404);
-        return response()->json($post);
+
+        $post = Post::with('user')
+            ->where('id', $post_id)
+            ->firstOrFail();
+
+        return new PostResource($post);
     }
 
     public function store(Request $request)
@@ -56,7 +64,8 @@ class PostController extends Controller
                 'caption'   => $request->input('caption'),
             ]);
 
-            // Detectar menciones en el contenido y notificar a cada usuario mencionado
+            $post->load('user');
+
             $this->detectAndNotifyMentions(
                 Auth::user(),
                 'post',
@@ -64,10 +73,7 @@ class PostController extends Controller
                 $post->content ?? ''
             );
 
-            return response()->json([
-                'message' => 'Post creado correctamente',
-                'post'    => $post
-            ], 201);
+            return new PostResource($post);
 
         } catch (QueryException $e) {
             return response()->json([
@@ -102,17 +108,13 @@ class PostController extends Controller
             } catch (\Exception $e) {
                 return response()->json(['message' => 'Error al eliminar el post'], 500);
             }
-        } else {
-            return response()->json(['message' => 'No tienes permiso para eliminar este post.'], 403);
         }
+
+        return response()->json(['message' => 'No tienes permiso para eliminar este post.'], 403);
     }
 
-    /**
-     * Extrae todas las “@username” de $text, busca usuarios y notifica a cada uno.
-     */
     protected function detectAndNotifyMentions($mentioner, string $contextType, int $contextId, string $text)
     {
-        // Regex para buscar @username
         preg_match_all('/@([a-zA-Z0-9_]+)/', $text, $matches);
 
         if (! empty($matches[1])) {
@@ -122,7 +124,6 @@ class PostController extends Controller
                 $user = User::where('username', $username)->first();
 
                 if ($user && $user->id !== $mentioner->id) {
-                    // Tomar un fragmento breve donde aparece la mención
                     $pos = mb_stripos($text, "@{$username}");
                     if ($pos !== false) {
                         $start   = max(0, $pos - 10);
