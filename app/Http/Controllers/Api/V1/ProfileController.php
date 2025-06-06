@@ -161,4 +161,17 @@ class ProfileController extends Controller
 
         return response()->json(['message' => 'Cuenta eliminada correctamente.']);
     }
+
+    public function suggestions(): JsonResponse
+    {
+        $user = Auth::user();
+        $excludeIds = $user->following()->pluck('id')->toArray();
+        $excludeIds[] = $user->id;
+
+        $randomUsers = User::whereNotIn('id', $excludeIds)
+            ->inRandomOrder()
+            ->limit(3)
+            ->get();
+        return response()->json(UserResource::collection($randomUsers));
+    }
 }
