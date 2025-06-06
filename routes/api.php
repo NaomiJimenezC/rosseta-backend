@@ -68,6 +68,7 @@ Route::group(['prefix' => 'v1'], function () {
         Route::patch('/profile/picture',          [ProfileController::class, 'updateProfilePicture'])->name('profile.picture.update');
         Route::delete('/profile/picture',         [ProfileController::class, 'deleteProfilePicture'])->name('profile.picture.destroy');
         Route::delete('/profile',                 [ProfileController::class, 'destroy'])->name('profile.destroy');
+        Route::get('/profile/suggestions',          [ProfileController::class, 'suggestions'])->name('profile.sugestions');
 
         // Feed
         Route::get('/feed', [PostFolloweeController::class, 'index'])->name('feed.index');
