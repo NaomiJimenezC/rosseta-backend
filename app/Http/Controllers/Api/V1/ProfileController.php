@@ -165,7 +165,7 @@ class ProfileController extends Controller
     public function suggestions(): JsonResponse
     {
         $user = Auth::user();
-        $excludeIds = $user->following()->pluck('id')->toArray();
+        $excludeIds = $user->following()->pluck('users.id')->toArray();
         $excludeIds[] = $user->id;
 
         $randomUsers = User::whereNotIn('id', $excludeIds)
