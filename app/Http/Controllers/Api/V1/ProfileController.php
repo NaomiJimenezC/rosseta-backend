@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -43,7 +44,7 @@ class ProfileController extends Controller
             return response()->json(['message' => 'Usuario no encontrado.'], 404);
         }
 
-        return response()->json($user);
+        return response()->json(new UserResource($user));
     }
 
     /**
@@ -60,16 +61,13 @@ class ProfileController extends Controller
             'username' => 'nullable|string|unique:users,username,' . $user->id,
             'email' => 'nullable|string|email|unique:users,email,' . $user->id,
             'phone_number' => 'nullable|string',
-            'birthday' => 'nullable|date',
             'profile_picture_url' => 'nullable|string|url',
-            // Añade otros campos que quieras permitir editar
         ]);
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        // Accede a los datos validados desde el objeto $validator
         $validatedData = $validator->valid();
 
         $user->update($validatedData);

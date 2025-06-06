@@ -58,7 +58,7 @@ class FollowController extends Controller
             }
 
             return response()->json(['message' => 'Has comenzado a seguir a este usuario.'], 201);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json(['message' => 'Error al seguir al usuario.', 'error' => $e->getMessage()], 500);
         }
     }
