@@ -59,6 +59,7 @@ Route::group(['prefix' => 'v1'], function () {
         Route::get('/users/{user}/followers',  [FollowController::class, 'getFollowers'])->name('follows.followers');
         Route::get('/users/{user}/following',  [FollowController::class, 'getFollowing'])->name('follows.following');
         Route::get('/users/{user}/is-following',[FollowController::class, 'isFollowing'])->name('follows.isFollowing');
+        Route::delete('/users/{user}/remove-follower', [FollowController::class, 'removeFollower']);
 
         // Profile
         Route::get('/profile',                    [ProfileController::class, 'show'])->name('profile.show');

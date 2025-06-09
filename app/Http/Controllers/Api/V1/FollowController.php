@@ -154,4 +154,40 @@ class FollowController extends Controller
             return response()->json(['message' => 'Error interno al procesar la solicitud.', 'error' => $e->getMessage()], 500);
         }
     }
+
+    /**
+     * Remove a follower from the authenticated user.
+     *
+     * @param  \App\Models\User  $user The follower to remove.
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function removeFollower(User $user): JsonResponse
+    {
+        if (!Auth::check()) {
+            return response()->json(['message' => 'Debes estar autenticado para eliminar seguidores.'], 401);
+        }
+
+        $authUserId = Auth::id();
+        $followerId = $user->id;
+
+        if ($authUserId === $followerId) {
+            return response()->json(['message' => 'No puedes eliminarte a ti mismo como seguidor.'], 400);
+        }
+
+        $follow = Follow::where('follower_id', $followerId)
+            ->where('followee_id', $authUserId)
+            ->first();
+
+        if (!$follow) {
+            return response()->json(['message' => 'Este usuario no es tu seguidor.'], 404);
+        }
+
+        try {
+            $follow->delete();
+            return response()->json(['message' => 'Seguidor eliminado correctamente.'], 200);
+        } catch (\Exception $e) {
+            Log::error("Error al eliminar seguidor {$followerId} de usuario {$authUserId}: " . $e->getMessage());
+            return response()->json(['message' => 'Error al eliminar al seguidor.', 'error' => $e->getMessage()], 500);
+        }
+    }
 }
