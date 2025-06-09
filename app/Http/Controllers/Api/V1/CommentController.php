@@ -25,13 +25,11 @@ class CommentController extends Controller
 
         $postId = $request->input('post_id');
 
-        // Traemos los comentarios con su usuario (solo para tener los datos en memoria).
         $comments = Comment::where('post_id', $postId)
             ->with('user')
             ->latest()
             ->get();
 
-        // Mapeamos cada comentario para que el usuario vaya dentro de UserResource
         $result = $comments->map(function($c) {
             return [
                 'id'         => $c->id,
@@ -120,6 +118,37 @@ class CommentController extends Controller
             }
         } else {
             return response()->json(['message' => 'No tienes permiso para eliminar este comentario.'], 403);
+        }
+    }
+    public function deleteByPostAuthor(Request $request)
+    {
+        if (!Auth::check()) {
+            return response()->json(['message' => 'Debes estar autenticado para eliminar un comentario.'], 401);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'comment_id' => 'required|exists:comments,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        $comment = Comment::with('post')->findOrFail($request->input('comment_id'));
+
+        $post = $comment->post;
+        if (Auth::id() !== $post->users_id) {
+            return response()->json(['message' => 'No tienes permiso para eliminar comentarios de este post.'], 403);
+        }
+
+        try {
+            $comment->delete();
+            return response()->json(['message' => 'Comentario eliminado correctamente por el autor del post.'], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error al eliminar el comentario.',
+                'error'   => $e->getMessage()
+            ], 500);
         }
     }
 }

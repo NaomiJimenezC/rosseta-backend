@@ -45,6 +45,7 @@ Route::group(['prefix' => 'v1'], function () {
         Route::get('/comments',   [CommentController::class, 'index'])->name('comments.index');
         Route::post('/comments',  [CommentController::class, 'store'])->name('comments.store');
         Route::delete('/comments',[CommentController::class, 'delete'])->name('comments.destroy');
+        Route::delete('comments/author-delete', [CommentController::class, 'deleteByPostAuthor']);
 
         // Likes
         Route::get('/users/liked',     [LikeController::class, 'index'])->name('likes.index');
