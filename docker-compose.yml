@@ -2,7 +2,7 @@ version: '3.8'
 services:
   app:
     build: .
-    container_name: tu_aplicacion_php
+    container_name: laravel_rosseta
     ports:
       - "9000:9000"
     volumes:
@@ -15,7 +15,6 @@ services:
       - DB_DATABASE=${DB_DATABASE}
       - DB_USERNAME=${DB_USERNAME}
       - DB_PASSWORD=${DB_PASSWORD}
-      # Otras variables de entorno de tu aplicación
     depends_on:
       - pgsql
     env_file:
@@ -24,7 +23,7 @@ services:
 
   web:
     build: ./nginx
-    container_name: tu_aplicacion_nginx
+    container_name: nginx_rosseta
     ports:
       - "80:80"
       - "443:443"
@@ -36,14 +35,14 @@ services:
       - app
 
   pgsql:
-    image: postgres:latest  # Puedes especificar una versión si lo deseas (ej: postgres:15)
-    container_name: tu_base_de_datos_pgsql
+    image: postgres:latest
+    container_name: rosseta-db
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     ports:
-      - "5432:5432" # Puedes cambiar el puerto del host si es necesario
+      - "5432:5432" 
     volumes:
       - pgsql_data:/var/lib/postgresql/data
     env_file:
